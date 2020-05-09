@@ -284,23 +284,23 @@ var exactmetrics_frontend = {"js_events_tracking":"true","download_extensions":"
 
 
 
-<hr class="wp-block-separator"><p><em><strong>A quick disclaimer: </strong>This post isnâ&#128;&#153;t called H2O.ai: Going for the 100m freestyle world record. Iâ&#128;&#153;m not trying to win a Kaggle competition. Iâ&#128;&#153;m not carrying out detailed, highly-controlled benchmarking tests. Iâ&#128;&#153;m not, in fact, claiming to be doing anything particularly useful at all. This is <a href="#justme">just me</a>, just playing around with some code, just for the fun of it.</em></p>
+<hr class="wp-block-separator"><p><em><strong>A quick disclaimer: </strong>This post isn't called H2O.ai: Going for the 100m freestyle world record. I'm not trying to win a Kaggle competition. I'm not carrying out detailed, highly-controlled benchmarking tests. I'm not, in fact, claiming to be doing anything particularly useful at all. This is <a href="#justme">just me</a>, just playing around with some code, just for the fun of it.</em></p>
 <div id="h-to-o-dot-what" class="section level2">
 <h2>H-to-O dot <em>what</em>?</h2>
-<p>â&#128;&#156;Iâ&#128;&#153;ve never even heard of that,â&#128;&#157; you might be thinking. Well, donâ&#128;&#153;t worry – neither had I until very recently. Letâ&#128;&#153;s start by having a look at their website.</p>
-<blockquote><p>H2O is the worldâ&#128;&#153;s leading open source deep learning platform. H2O is used by over 100,000 data scientists and more than 10,000 organizations around the world. – <strong><a class="uri" href="https://www.mango-solutions.com/blog/admin/pages/blog/www.h2o.ai">www.h2o.ai</a></strong></p></blockquote>
+<p>"I've never even heard of that," you might be thinking. Well, don't worry – neither had I until very recently. Let's start by having a look at their website.</p>
+<blockquote><p>H2O is the world's leading open source deep learning platform. H2O is used by over 100,000 data scientists and more than 10,000 organizations around the world. – <strong><a class="uri" href="https://www.mango-solutions.com/blog/admin/pages/blog/www.h2o.ai">www.h2o.ai</a></strong></p></blockquote>
 <p>In other words, H2O – which has been around since way back in 2011 – is a widely-used platform for carrying out machine learning and data analysis, which is optimised for working wth large datasets.</p>
 <p>The primary focus really is on the machine learning. There is a wide selection of algorithms to choose from, ranging from random forests and neural networks to PCA and Word2vec (a full list can be found <a href="http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science.html">in the documentation</a>).</p>
-<p>H2O is a language in its own right, although under the hood it is largely written in Java. This makes it incredibly flexible: you can use it with R or Python, link into Spark and Hadoop, or use the built-in â&#128;&#156;Flowâ&#128;&#157; interface. Iâ&#128;&#153;ll cover some of this functionality in the rest of this post.</p>
+<p>H2O is a language in its own right, although under the hood it is largely written in Java. This makes it incredibly flexible: you can use it with R or Python, link into Spark and Hadoop, or use the built-in "Flow" interface. I'll cover some of this functionality in the rest of this post.</p>
 </div>
 <div id="demo-random-forest" class="section level2">
 <h2>Demo: Random Forest</h2>
-<p>Letâ&#128;&#153;s test out a couple of H2Oâ&#128;&#153;s algorithms. To start with, weâ&#128;&#153;ll use a random forest for a classification task.</p>
-<p>Iâ&#128;&#153;m going to use the <a href="http://archive.ics.uci.edu/ml/datasets/Covertype">â&#128;&#156;Covertypeâ&#128;&#157; dataset</a> from the UCI ML datasets archive. This dataset contains nearly 600000 records representing different locations in the USA. The challenge is to predict tree cover type (spruce/fir, pine, aspen etc.) using only cartographic variables (elevation, slope, soil type etc.).</p>
-<p>So effectively, the plan is to use a random forest to classifyâ&#128;¦ yep, random forests.</p>
+<p>Let's test out a couple of H2O's algorithms. To start with, we'll use a random forest for a classification task.</p>
+<p>I'm going to use the <a href="http://archive.ics.uci.edu/ml/datasets/Covertype">"Covertype" dataset</a> from the UCI ML datasets archive. This dataset contains nearly 600000 records representing different locations in the USA. The challenge is to predict tree cover type (spruce/fir, pine, aspen etc.) using only cartographic variables (elevation, slope, soil type etc.).</p>
+<p>So effectively, the plan is to use a random forest to classify... yep, random forests.</p>
 <div id="data-import" class="section level3">
 <h3>Data import</h3>
-<p>Without further ado, letâ&#128;&#153;s get the data into R and have a look at it. <em>Note: for now, Iâ&#128;&#153;m going to be using the R interface to H2O, but later weâ&#128;&#153;ll try out the Flow interface too.</em></p>
+<p>Without further ado, let's get the data into R and have a look at it. <em>Note: for now, I'm going to be using the R interface to H2O, but later we'll try out the Flow interface too.</em></p>
 <pre class="r"><code># Load some packages for data manipulation
 library(dplyr)
 library(readr)
@@ -321,17 +321,17 @@ str(covtype)</code></pre>
 ## [... loads more columns...]
 ## $ X54: Factor w/ 2 levels "0","1": 1 1 1 1 1 1 1 1 1 1 ...
 ## $ X55: Factor w/ 7 levels "1","2","3","4",..: 5 5 2 2 5 2 5 5 5 5 ...</code></pre>
-<p>An explanation of the dataset is available on the download page. The CSV file itself doesnâ&#128;&#153;t contain any column names, and the ones R creates for us arenâ&#128;&#153;t particularly helpful; but actually, it wonâ&#128;&#153;t really matter. We only need to take note of a couple of things:</p>
-<ul><li>The first 10 columns are <strong>numeric variables</strong> representing various geographical aspects of the location in question. Average yearly rainfall, degree of slope, number of minutes of sunlight between 3 and 4 oâ&#128;&#153;clock on the second Wednesday of August during a leap year, and so on.</li>
-<li>Columns 11-14 are <strong>binary categorical variables</strong> signalling whether the forest is within one of four â&#128;&#156;Wilderness Areasâ&#128;&#157;. So if the forest <em>is</em> in one of these areas, then the column representing that area will contain a 1; otherwise each column will contain a 0.</li>
-<li>Columns 15-54 are binary categorical variables representing soil type: i.e. Column 11 is storing the answer to â&#128;&#156;is this area Soil Type 1?â&#128;&#157;, where the answers â&#128;&#156;yesâ&#128;&#157; or â&#128;&#156;noâ&#128;&#157; are represented by 1 or 0 respectively. So each record has a 1 in precisely one of these columns, and 0 in the other columns.</li>
-<li><strong>Column 55 is the important one</strong>: itâ&#128;&#153;s the label indicating what the cover type actually is. This is the <strong>target variable</strong> which weâ&#128;&#153;re going to try to predict! There are <strong>7 different possible labels</strong>, representing spruce/fir, aspen, Ponderosa pine etc.</li>
+<p>An explanation of the dataset is available on the download page. The CSV file itself doesn't contain any column names, and the ones R creates for us aren't particularly helpful; but actually, it won't really matter. We only need to take note of a couple of things:</p>
+<ul><li>The first 10 columns are <strong>numeric variables</strong> representing various geographical aspects of the location in question. Average yearly rainfall, degree of slope, number of minutes of sunlight between 3 and 4 o'clock on the second Wednesday of August during a leap year, and so on.</li>
+<li>Columns 11-14 are <strong>binary categorical variables</strong> signalling whether the forest is within one of four "Wilderness Areas". So if the forest <em>is</em> in one of these areas, then the column representing that area will contain a 1; otherwise each column will contain a 0.</li>
+<li>Columns 15-54 are binary categorical variables representing soil type: i.e. Column 11 is storing the answer to "is this area Soil Type 1?", where the answers "yes" or "no" are represented by 1 or 0 respectively. So each record has a 1 in precisely one of these columns, and 0 in the other columns.</li>
+<li><strong>Column 55 is the important one</strong>: it's the label indicating what the cover type actually is. This is the <strong>target variable</strong> which we're going to try to predict! There are <strong>7 different possible labels</strong>, representing spruce/fir, aspen, Ponderosa pine etc.</li>
 </ul><p>We converted columns 11-55 to factors when we imported the data, so we can crack on with some machine learning right away.</p>
 </div>
 <div id="the-h2o-r-package" class="section level3">
 <h3>The h2o R package</h3>
-<p>H2O can be downloaded on its own, but if youâ&#128;&#153;re using it with R itâ&#128;&#153;s easier to install the <code>h2o</code> package (which is available on CRAN). Youâ&#128;&#153;ll also need to have Java installed.</p>
-<p>Then you can go ahead and load the package into R, and before you can do anything else youâ&#128;&#153;ll need to get an H2O cluster up and running using <code>h2o.init()</code>.</p>
+<p>H2O can be downloaded on its own, but if you're using it with R it's easier to install the <code>h2o</code> package (which is available on CRAN). You'll also need to have Java installed.</p>
+<p>Then you can go ahead and load the package into R, and before you can do anything else you'll need to get an H2O cluster up and running using <code>h2o.init()</code>.</p>
 <pre class="r"><code>library(h2o)
 h2o.init()</code></pre>
 <pre><code>## Connection successful!
@@ -351,19 +351,19 @@ h2o.init()</code></pre>
 ## H2O Connection proxy: NA 
 ## H2O Internal Security: FALSE 
 ## R Version: R version 3.4.0 (2017-04-21)</code></pre>
-<p>This shows us some information about the session weâ&#128;&#153;ve just created. Notice the cluster is running on a Java Virtual Machine (JVM), and in my case Iâ&#128;&#153;m running on 1 node (my laptop) and 4 cores. If youâ&#128;&#153;re lucky enough to have a larger setup then you can edit these settings to suit you.</p>
-<p>The only function weâ&#128;&#153;ve used so far gives a good indication of how the package works: the general form of functions is <code>h2o.*(...)</code>, and more often than not the <code>*</code> is replaced by <em>what you would guess you should put there</em>. At first, we want to initialise a cluster, so we use <code>h2o.init</code>. The function names tend to be quite intuitive, so after youâ&#128;&#153;ve seen them once or twice itâ&#128;&#153;s very easy to remember them.</p>
-<p>On with the show! Recall that our <code>covtype</code> dataset is currently sitting happily in an R dataframe. However, weâ&#128;&#153;re only <em>accessing</em> our H2O cluster through R (remember itâ&#128;&#153;s running behind the scenes on a JVM), so we need to pass the data on to the cluster in a format it can work with.</p>
-<p>Fortunately this is very easy: <code>as.h2o</code> converts a dataframe to an â&#128;&#156;H2OFrameâ&#128;&#157;. In the R session, itâ&#128;&#153;s stored as an environment, but actually this is just a pointer to the data structure which has been created by H2O.</p>
+<p>This shows us some information about the session we've just created. Notice the cluster is running on a Java Virtual Machine (JVM), and in my case I'm running on 1 node (my laptop) and 4 cores. If you're lucky enough to have a larger setup then you can edit these settings to suit you.</p>
+<p>The only function we've used so far gives a good indication of how the package works: the general form of functions is <code>h2o.*(...)</code>, and more often than not the <code>*</code> is replaced by <em>what you would guess you should put there</em>. At first, we want to initialise a cluster, so we use <code>h2o.init</code>. The function names tend to be quite intuitive, so after you've seen them once or twice it's very easy to remember them.</p>
+<p>On with the show! Recall that our <code>covtype</code> dataset is currently sitting happily in an R dataframe. However, we're only <em>accessing</em> our H2O cluster through R (remember it's running behind the scenes on a JVM), so we need to pass the data on to the cluster in a format it can work with.</p>
+<p>Fortunately this is very easy: <code>as.h2o</code> converts a dataframe to an "H2OFrame". In the R session, it's stored as an environment, but actually this is just a pointer to the data structure which has been created by H2O.</p>
 <pre class="r"><code>wet <- as.h2o(covtype)</code></pre>
-<p>Weâ&#128;&#153;re going to want to assess the performance of our random forest once weâ&#128;&#153;ve trained it, so weâ&#128;&#153;ll split our data into training and test sets using <code>h2o.splitFrame</code> – intuitive names, remember?</p>
+<p>We're going to want to assess the performance of our random forest once we've trained it, so we'll split our data into training and test sets using <code>h2o.splitFrame</code> – intuitive names, remember?</p>
 <pre class="r"><code>wet_split <- h2o.splitFrame(wet, ratios = 0.75, seed = 820)</code></pre>
 <p>The observations are randomly divided into sets according to the ratios specfied. Our split is 75:25, but <code>ratios</code> can be a vector too: if, for example, you wanted to create a cross-validation set too, then you could specify <code>ratios = c(0.6, 0.2)</code> to get a 60:20:20 split.</p>
-<p>Now we can train our classifier. We want a random forest, so we use – you guessed it – <code>h2o.randomForest</code>. Remember that the label for each observation is in the 55th column, so we set the target variable <code>y</code> to 55. Our training dataframe is the first set from our split data, and then you can include a whole load of other optional parameters. Iâ&#128;&#153;m not going to go into huge detail here; Iâ&#128;&#153;m just going to set the number of trees to train, and the number of folds for cross-validation. But if youâ&#128;&#153;re super keen on making sure your trees are balanced or on fiddling around with per-class sample rates, then rest assured that you can do so. If you donâ&#128;&#153;t think balancing trees will do your back any good then fear not: H2O does a pretty good job of using sensible defaults for any parameters you donâ&#128;&#153;t explicitly include.</p>
+<p>Now we can train our classifier. We want a random forest, so we use – you guessed it – <code>h2o.randomForest</code>. Remember that the label for each observation is in the 55th column, so we set the target variable <code>y</code> to 55. Our training dataframe is the first set from our split data, and then you can include a whole load of other optional parameters. I'm not going to go into huge detail here; I'm just going to set the number of trees to train, and the number of folds for cross-validation. But if you're super keen on making sure your trees are balanced or on fiddling around with per-class sample rates, then rest assured that you can do so. If you don't think balancing trees will do your back any good then fear not: H2O does a pretty good job of using sensible defaults for any parameters you don't explicitly include.</p>
 <pre class="r"><code>h2o_rf <- h2o.randomForest(y = 55, training_frame = wet_split[[1]],
 ntrees = 1, nfolds = 2)</code></pre>
-<p>You might argue that one tree a forest doth not make, and I would agree with you. This is just a demonstration of the syntax – weâ&#128;&#153;ll make a proper forest in a minute!</p>
-<p>Once the model has finished training, we can calculate some useful performance metrics using <code>h2o.performance</code> – Iâ&#128;&#153;m passing in the model weâ&#128;&#153;ve just trained, and the second part of our dataset (which is our test set).</p>
+<p>You might argue that one tree a forest doth not make, and I would agree with you. This is just a demonstration of the syntax – we'll make a proper forest in a minute!</p>
+<p>Once the model has finished training, we can calculate some useful performance metrics using <code>h2o.performance</code> – I'm passing in the model we've just trained, and the second part of our dataset (which is our test set).</p>
 <pre class="r"><code>h2o.performance(h2o_rf, wet_split[[2]])</code></pre>
 <pre><code>## H2OMultinomialMetrics: drf
 ## 
@@ -398,33 +398,33 @@ ntrees = 1, nfolds = 2)</code></pre>
 ## 5 5 0.979200
 ## 6 6 0.979200
 ## 7 7 1.000000</code></pre>
-<p>This gives us numeric metrics such as mean square error; a confusion matrix of predicted vs actual classes, with per-class error rates calculated for us; and a â&#128;&#156;hit ratio tableâ&#128;&#157;.</p>
-<p>For each observation, the classifier works out how likely it is that the observation belongs to each of the 7 classes. This allows it to make a â&#128;&#156;best guessâ&#128;&#157; at the actual class (which is the â&#128;&#156;predictionâ&#128;&#157;), but it can also make a second-best guess, a third-best, and so on.</p>
+<p>This gives us numeric metrics such as mean square error; a confusion matrix of predicted vs actual classes, with per-class error rates calculated for us; and a "hit ratio table".</p>
+<p>For each observation, the classifier works out how likely it is that the observation belongs to each of the 7 classes. This allows it to make a "best guess" at the actual class (which is the "prediction"), but it can also make a second-best guess, a third-best, and so on.</p>
 <p><img class="alignnone size-full wp-image-4000" src="https://mango-solutions.com/assets/sites/6/2018/01/image2.png" alt="" width="540" height="123" srcset="https://www.mango-solutions.com/assets/sites/6/2018/01/image2.png 540w,https://www.mango-solutions.com/assets/sites/6/2018/01/image2-300x68.png 300w" sizes="(max-width: 540px) 100vw, 540px"></p>
 <div id="demo-random-forest" class="section level2">
 <div id="the-h2o-r-package" class="section level3">
 <p>The <span class="math inline"><span id="MathJax-Element-1-Frame" class="MathJax" style="font-style: normal;font-weight: normal;line-height: normal;font-size: 16px;text-indent: 0px;text-align: left;letter-spacing: normal;float: none;direction: ltr;max-width: none;max-height: none;min-width: 0px;min-height: 0px;border: 0px;padding: 0px;margin: 0px" role="presentation"><span id="MathJax-Span-1" class="math"><span id="MathJax-Span-2" class="mrow"><span id="MathJax-Span-3" class="mi">k</span></span></span><span class="MJX_Assistive_MathML" role="presentation">k</span></span></span>th row of the hit ratio table gives us the proportion of observations which are correctly classified within the top <span class="math inline"><span id="MathJax-Element-2-Frame" class="MathJax" style="font-style: normal;font-weight: normal;line-height: normal;font-size: 16px;text-indent: 0px;text-align: left;letter-spacing: normal;float: none;direction: ltr;max-width: none;max-height: none;min-width: 0px;min-height: 0px;border: 0px;padding: 0px;margin: 0px" role="presentation"><span id="MathJax-Span-4" class="math"><span id="MathJax-Span-5" class="mrow"><span id="MathJax-Span-6" class="mi">k</span></span></span><span class="MJX_Assistive_MathML" role="presentation">k</span></span></span> guesses the classifier makes. So <span class="math inline"><span id="MathJax-Element-3-Frame" class="MathJax" style="font-style: normal;font-weight: normal;line-height: normal;font-size: 16px;text-indent: 0px;text-align: left;letter-spacing: normal;float: none;direction: ltr;max-width: none;max-height: none;min-width: 0px;min-height: 0px;border: 0px;padding: 0px;margin: 0px" role="presentation"><span id="MathJax-Span-7" class="math"><span id="MathJax-Span-8" class="mrow"><span id="MathJax-Span-9" class="mi">k</span><span id="MathJax-Span-10" class="mo">=</span><span id="MathJax-Span-11" class="mn">1</span></span></span><span class="MJX_Assistive_MathML" role="presentation">k=1</span></span></span> is the accuracy of the classifier – i.e. the proportion of observations which are correctly predicted – <span class="math inline"><span id="MathJax-Element-4-Frame" class="MathJax" style="font-style: normal;font-weight: normal;line-height: normal;font-size: 16px;text-indent: 0px;text-align: left;letter-spacing: normal;float: none;direction: ltr;max-width: none;max-height: none;min-width: 0px;min-height: 0px;border: 0px;padding: 0px;margin: 0px" role="presentation"><span id="MathJax-Span-12" class="math"><span id="MathJax-Span-13" class="mrow"><span id="MathJax-Span-14" class="mi">k</span><span id="MathJax-Span-15" class="mo">=</span><span id="MathJax-Span-16" class="mn">2</span></span></span><span class="MJX_Assistive_MathML" role="presentation">k=2</span></span></span> is the proportion which are within the first two guesses the classifier makes, and so on. The actual class will definitely be in the top 7 guesses (there are only 7 possible classes!) so for <span class="math inline"><span id="MathJax-Element-5-Frame" class="MathJax" style="font-style: normal;font-weight: normal;line-height: normal;font-size: 16px;text-indent: 0px;text-align: left;letter-spacing: normal;float: none;direction: ltr;max-width: none;max-height: none;min-width: 0px;min-height: 0px;border: 0px;padding: 0px;margin: 0px" role="presentation"><span id="MathJax-Span-17" class="math"><span id="MathJax-Span-18" class="mrow"><span id="MathJax-Span-19" class="mi">k</span><span id="MathJax-Span-20" class="mo">=</span><span id="MathJax-Span-21" class="mn">7</span></span></span><span class="MJX_Assistive_MathML" role="presentation">k=7</span></span></span> the hit ratio is 100%.</p>
 <p>If your classification task is binomial then you can calculate many other relevant metrics (precision, F1 score, false negative rate etc.) using the selection of <code>h2o.metric</code> functions which are available.</p>
-<p>Weâ&#128;&#153;ll come back to this random forest soon, but first Iâ&#128;&#153;m going to have a little look at H2O Flow.</p>
+<p>We'll come back to this random forest soon, but first I'm going to have a little look at H2O Flow.</p>
 </div>
 <div id="h2o-flow" class="section level2">
 <h2>H2O Flow</h2>
-<p>H2O Flow is H2Oâ&#128;&#153;s own browser-based interface. Getting started is easy:</p>
+<p>H2O Flow is H2O's own browser-based interface. Getting started is easy:</p>
 <ol><li>Initialise an H2O cluster (e.g. by running <code>h2o.init()</code> in R)</li>
 <li>Go to <code>localhost:54321</code> in browser</li>
 <li>Unplug keyboard</li>
-</ol><p>Honestly. You can do that. You donâ&#128;&#153;t need it.</p>
+</ol><p>Honestly. You can do that. You don't need it.</p>
 <p><img class="alignnone size-full wp-image-4001" src="https://mango-solutions.com/assets/sites/6/2018/01/image3-1.png" alt="" width="640" height="164" srcset="https://www.mango-solutions.com/assets/sites/6/2018/01/image3-1.png 640w,https://www.mango-solutions.com/assets/sites/6/2018/01/image3-1-300x77.png 300w" sizes="(max-width: 640px) 100vw, 640px"></p>
-<p>Flow is based on a notebook-style layout. Code is added to cells, which are then run in sequence. You <em>can</em> write raw H2O code yourself, but itâ&#128;&#153;s much easier to use the drop-down menus and buttons and let Flow compile the code for you.</p>
+<p>Flow is based on a notebook-style layout. Code is added to cells, which are then run in sequence. You <em>can</em> write raw H2O code yourself, but it's much easier to use the drop-down menus and buttons and let Flow compile the code for you.</p>
 <p>The really nice thing about Flow is that it allows you to see exactly what your options are at each stage. When you finish one operation, it gives you a selection of things which you might want to do next. When you are able to change options or parameters, it lists them all out for you so you can <em>see</em> which ones are available and which ones you might want to change.</p>
 <p><img class="alignnone size-full wp-image-4002" src="https://mango-solutions.com/assets/sites/6/2018/01/image4-1.gif" alt="" width="800" height="451"></p>
 <div id="h2o-flow" class="section level2">
-<p>If you like writing code and you already know exactly what youâ&#128;&#153;re planning on doing, then the R interface is quicker to use and much more concise. But Iâ&#128;&#153;d encourage you to play around with Flow for a while at some point, because youâ&#128;&#153;ll probably discover something that you hadnâ&#128;&#153;t used before.</p>
-<p>Also, itâ&#128;&#153;s worth clarifying that when youâ&#128;&#153;re using H2O, your data is always <em>on your cluster</em> (in my case, my laptop, but it could be your big server in the basement). Flow uses the browser for display, but itâ&#128;&#153;s not pinging a server – itâ&#128;&#153;s all hosted locally (hence <code>localhost</code>!). So you donâ&#128;&#153;t need to worry about data being intercepted or anything.</p>
+<p>If you like writing code and you already know exactly what you're planning on doing, then the R interface is quicker to use and much more concise. But I'd encourage you to play around with Flow for a while at some point, because you'll probably discover something that you hadn't used before.</p>
+<p>Also, it's worth clarifying that when you're using H2O, your data is always <em>on your cluster</em> (in my case, my laptop, but it could be your big server in the basement). Flow uses the browser for display, but it's not pinging a server – it's all hosted locally (hence <code>localhost</code>!). So you don't need to worry about data being intercepted or anything.</p>
 <div id="comparison-randomforest-and-caret" class="section level3">
 <h3>Comparison: randomForest and caret</h3>
 <p>Going back to our random-forest random forest from earlier, we can set up the R equivalent of the H2O forest using the <code>randomForest</code> and <code>caret</code>packages. Specifically, <code>caret</code> is great for dealing with the ML process as a whole – splitting data, managing cross-validation etc. – and in this case it uses <code>randomForest</code> to actually train a classifier.</p>
-<p>Iâ&#128;&#153;m putting the code for this into a little function called <code>do_rf</code>: it just records the time taken to set up and train the forest, and then returns this time along with performance metrics for the forest.</p>
+<p>I'm putting the code for this into a little function called <code>do_rf</code>: it just records the time taken to set up and train the forest, and then returns this time along with performance metrics for the forest.</p>
 <pre class="r"><code>do_rf <- function(ntrees, nfolds) {
 
 # Record time at start
@@ -449,8 +449,8 @@ preds <- predict(rf, covtype[-caret_split, ])
 # Return runtime and performance metrics
 list(exec_time, confusionMatrix(preds, covtype$X55[-caret_split]))
 }</code></pre>
-<p>Technically, cross-validation isnâ&#128;&#153;t really necessary for a random forest, since the algorithm isnâ&#128;&#153;t prone to overfitting. However, itâ&#128;&#153;s a useful example to show how the entire ML workflow is integrated into H2O (using cross-validation is as simple as setting the <code>nfolds</code> parameter), whereas in R you really need to use a â&#128;&#156;metaâ&#128;&#157;-ML package such as <code>caret</code> or <code>mlr</code> to set up ML projects.</p>
-<p>Letâ&#128;&#153;s run the <code>do_rf</code> function and see what happens. Weâ&#128;&#153;ll use 10 trees and 2-fold cross-validation.</p>
+<p>Technically, cross-validation isn't really necessary for a random forest, since the algorithm isn't prone to overfitting. However, it's a useful example to show how the entire ML workflow is integrated into H2O (using cross-validation is as simple as setting the <code>nfolds</code> parameter), whereas in R you really need to use a "meta"-ML package such as <code>caret</code> or <code>mlr</code> to set up ML projects.</p>
+<p>Let's run the <code>do_rf</code> function and see what happens. We'll use 10 trees and 2-fold cross-validation.</p>
 <pre class="r"><code>do_rf(ntrees = 10, nfolds = 2)</code></pre>
 <pre><code>## [[1]]
 ## Time difference of 7.788886 mins
@@ -473,7 +473,7 @@ list(exec_time, confusionMatrix(preds, covtype$X55[-caret_split]))
 ## Accuracy : 0.9602 
 ## 95% CI : (0.9592, 0.9612)
 ## [... some more stats]</code></pre>
-<p>Performance is reasonably good – according to the UCI website a simple backprop neural net achieved only 70% accuracy on this dataset, so weâ&#128;&#153;re well above that.</p>
+<p>Performance is reasonably good – according to the UCI website a simple backprop neural net achieved only 70% accuracy on this dataset, so we're well above that.</p>
 <p>We can compare this with the performance of the H2O forest by writing a similar <code>do_h2o</code> function containing the code from earlier, then running this function and looking at the results.</p>
 <pre class="r"><code>h2o_results <- do_h2o(ntrees = 10, nfolds = 2)</code></pre>
 <pre class="r"><code>print(h2o_results)</code></pre>
@@ -514,11 +514,11 @@ list(exec_time, confusionMatrix(preds, covtype$X55[-caret_split]))
 ## 5 5 0.999972
 ## 6 6 0.999986
 ## 7 7 1.000000</code></pre>
-<p>It turns out that <em>in this case</em>, H2O is faster than R, but the performance is actually worse. <em>In. This. Case.</em> This is <em>not</em> a solid benchmarking test, and of course it would be possible to improve the performance of both of the implementations through some parameter adjustment, but Iâ&#128;&#153;m not going to dive into all that. This is just a paddle, remember.</p>
+<p>It turns out that <em>in this case</em>, H2O is faster than R, but the performance is actually worse. <em>In. This. Case.</em> This is <em>not</em> a solid benchmarking test, and of course it would be possible to improve the performance of both of the implementations through some parameter adjustment, but I'm not going to dive into all that. This is just a paddle, remember.</p>
 </div>
 <div id="comparison-sparklyr" class="section level3">
 <h3>Comparison: sparklyr</h3>
-<p>Perhaps the best-known ML platform is Apache Spark, and seeing as thereâ&#128;&#153;s an R package to interface with it – <code>sparklyr</code> – I thought Iâ&#128;&#153;d take a brief tangent in order to try it out.</p>
+<p>Perhaps the best-known ML platform is Apache Spark, and seeing as there's an R package to interface with it – <code>sparklyr</code> – I thought I'd take a brief tangent in order to try it out.</p>
 <p>It turned out I was being a bit optimistic. It took me about 10 minutes to set up the H2O random forest for the first time; it took a few hours and lots of yelling at incomprehensible Java-related error messages before I managed to get compatible versions of Spark and Java configured correctly. In fairness this was probably more my fault than Spark’s…</p>
 <p>Once it was finally set up, the ML process was quite similar to H2O (although I must admit that initially I found the syntax a little more difficult to get my head around).</p>
 <pre class="r"><code>library(sparklyr)
@@ -543,7 +543,7 @@ preds <- sdf_predict(ml_rf, test_tbl)
 ml_classification_eval(preds, "V55", "prediction", "accuracy")</code></pre>
 <pre><code>## [1] 0.8295277</code></pre>
 <p>At the time of writing there is no facility in <code>sparklyr</code> for cross-validation. Having said that, the Spark MLlib library <em>does</em> include cross-validation, and <code>sparklyr</code> is still under active development, so this is something which may be added in future.</p>
-<p>Running a <code>do_spark(ntrees = 10)</code> function reveals a faster time but much lower accuracy than either R or H2O, but this isnâ&#128;&#153;t surprising given that weâ&#128;&#153;re not using cross-validation so weâ&#128;&#153;re doing less than half the work.</p>
+<p>Running a <code>do_spark(ntrees = 10)</code> function reveals a faster time but much lower accuracy than either R or H2O, but this isn't surprising given that we're not using cross-validation so we're doing less than half the work.</p>
 <div id="results-comparison" class="section level4">
 <h4>Results comparison</h4>
 <table class="table table-condensed"><thead><tr class="header"><th align="left"></th>
@@ -561,7 +561,7 @@ ml_classification_eval(preds, "V55", "prediction", "accuracy")</code></pre>
 </tr></tbody></table></div>
 <p><span style="font-size: 24px;font-weight: bold">Conversion with rsparkling</span></p>
 <div id="conversion-with-rsparkling" class="section level3">
-<p>If your dataset is already sitting in Spark (or you’re accessing it using Spark) and you want to use H2Oâ&#128;&#153;s algorithms on it, câ&#128;&#153;est possible. The <code>rsparkling</code>package allows you to convert a Spark frame to an H2OFrame, which you can then attack with <code>h2o</code>â&#128;&#153;s functions (e.g. you can take advantage of H2O’s cross-validation).</p>
+<p>If your dataset is already sitting in Spark (or you’re accessing it using Spark) and you want to use H2O's algorithms on it, c'est possible. The <code>rsparkling</code>package allows you to convert a Spark frame to an H2OFrame, which you can then attack with <code>h2o</code>'s functions (e.g. you can take advantage of H2O’s cross-validation).</p>
 <pre class="r"><code>library(rsparkling)
 
 options(rsparkling.sparklingwater.version = "2.0.11")
@@ -573,17 +573,17 @@ rsp_test <- as_h2o_frame(sc, test_tbl, strict_version_check = FALSE)
 
 rsp_rf <- h2o.randomForest(y = 55, training_frame = rsp_train,
 nfolds = 2, ntrees = 10)</code></pre>
-<p>Right, weâ&#128;&#153;ve been talking about random forests for quite a long time now. Iâ&#128;&#153;d say weâ&#128;&#153;re certainly in over our knees, and by my definition that means weâ&#128;&#153;re wading, not paddling. So Iâ&#128;&#153;m going to move on to a new algorithm and a new dataset.</p>
+<p>Right, we've been talking about random forests for quite a long time now. I'd say we're certainly in over our knees, and by my definition that means we're wading, not paddling. So I'm going to move on to a new algorithm and a new dataset.</p>
 </div>
 <p><span style="font-size: 29px;font-weight: bold">Demo: Neural nets for MNIST</span></p>
 <div id="demo-neural-nets-for-mnist" class="section level2">
-<p>Time for a real classic – according to Kaggle, the de facto â&#128;&#156;hello worldâ&#128;&#157; dataset of computer vision. The MNIST dataset is a collection of 60000 images of handwritten digits. Each image is 28×28 pixels in size, and is represented by a 28×28 matrix of values representing the intensity of each pixel.</p>
+<p>Time for a real classic – according to Kaggle, the de facto "hello world" dataset of computer vision. The MNIST dataset is a collection of 60000 images of handwritten digits. Each image is 28×28 pixels in size, and is represented by a 28×28 matrix of values representing the intensity of each pixel.</p>
 <p><img class="alignnone size-full wp-image-4003" src="https://mango-solutions.com/assets/sites/6/2018/01/Image5-1.png" alt="" width="640" height="252" srcset="https://www.mango-solutions.com/assets/sites/6/2018/01/Image5-1.png 640w,https://www.mango-solutions.com/assets/sites/6/2018/01/Image5-1-300x118.png 300w" sizes="(max-width: 640px) 100vw, 640px"></p>
 <div id="demo-neural-nets-for-mnist" class="section level2">
-<p>This matrix is then â&#128;&#156;unrolledâ&#128;&#157;, row by row, into a 784-length vector; and these vectors can be used to train a neural network to classify new images.</p>
+<p>This matrix is then "unrolled", row by row, into a 784-length vector; and these vectors can be used to train a neural network to classify new images.</p>
 <h3><span style="color: inherit;font-size: inherit;font-weight: bold">nnet</span></h3>
 <div id="nnet" class="section level3">
-<p>First letâ&#128;&#153;s get our data into R and create a split for training and test sets.</p>
+<p>First let's get our data into R and create a split for training and test sets.</p>
 <pre class="r"><code>library(dplyr)
 library(caret)
 
@@ -596,7 +596,7 @@ mutate_if(is.numeric, funs(./255))
 
 set.seed(528491)
 part <- createDataPartition(1:nrow(train), p = 0.75, list = FALSE)</code></pre>
-<p>The <code>nnet</code> package comes as part of the standard R installation and can be used to set up a simple feed-forward neural network. Here weâ&#128;&#153;ll use a 25-unit hidden layer, and weâ&#128;&#153;ll stop optimising after 100 iterations if we havenâ&#128;&#153;t already run out of steam by then.</p>
+<p>The <code>nnet</code> package comes as part of the standard R installation and can be used to set up a simple feed-forward neural network. Here we'll use a 25-unit hidden layer, and we'll stop optimising after 100 iterations if we haven't already run out of steam by then.</p>
 <p>As before, we can wrap this code in a little timer function:</p>
 <pre class="r"><code>library(nnet)
 
@@ -641,11 +641,11 @@ do_rnet()</code></pre>
 ## Accuracy : 0.934 
 ## 95% CI : (0.9291, 0.9387)
 ## [... etc.]</code></pre>
-<p>The accuracy ainâ&#128;&#153;t much to shout about – the top MNIST classifiers nowadays are well above 99% – but it isnâ&#128;&#153;t too bad for such a small implementation. It takes a little while to get there though.</p>
+<p>The accuracy ain't much to shout about – the top MNIST classifiers nowadays are well above 99% – but it isn't too bad for such a small implementation. It takes a little while to get there though.</p>
 </div>
 <p><span style="font-size: 24px;font-weight: bold">H2O</span></p>
 <div id="h2o" class="section level3">
-<p>Letâ&#128;&#153;s see how H2Oâ&#128;&#153;s implementation compares (they follow the relatively recent trend of calling neural networks â&#128;&#156;deep learningâ&#128;&#157; classifiers). Note that weâ&#128;&#153;re using the same setup here as we did for <code>nnet</code>, i.e. one hidden layer of 25 units, although I couldnâ&#128;&#153;t figure out how to limit the number of steps. Also note that the syntax is almost identical to when we implemented the random forest earlier; weâ&#128;&#153;ve just swapped out <code>randomForest</code> for <code>deeplearning</code>.</p>
+<p>Let's see how H2O's implementation compares (they follow the relatively recent trend of calling neural networks "deep learning" classifiers). Note that we're using the same setup here as we did for <code>nnet</code>, i.e. one hidden layer of 25 units, although I couldn't figure out how to limit the number of steps. Also note that the syntax is almost identical to when we implemented the random forest earlier; we've just swapped out <code>randomForest</code> for <code>deeplearning</code>.</p>
 <pre class="r"><code>do_h2o_net <- function() {nnet
 
 start <- Sys.time()
@@ -751,30 +751,30 @@ results</code></pre>
 <td align="right">0.956</td>
 <td align="right">2.2</td>
 </tr></tbody></table></div>
-<p>Thereâ&#128;&#153;s another slightly subtle point here, but itâ&#128;&#153;s a very important one. Notice that when we increase the complexity of the H2O net, the impact on training time is very small.</p>
-<p>However, swapping one 25-unit hidden layer for two 50-unit hidden layers means a <em>massive</em> increase in computational complexity. Itâ&#128;&#153;s not just because we have 4 times the number of neurons; that extra hidden layer means another stage of backpropagation, which is very computationally expensive. So actually, from the relatively small increase in training time, we see that the ML process scales very well (for this medium-sized dataset at least) and we can infer that a large chunk of those 2 minutes is in fact spent on data conversion.</p>
+<p>There's another slightly subtle point here, but it's a very important one. Notice that when we increase the complexity of the H2O net, the impact on training time is very small.</p>
+<p>However, swapping one 25-unit hidden layer for two 50-unit hidden layers means a <em>massive</em> increase in computational complexity. It's not just because we have 4 times the number of neurons; that extra hidden layer means another stage of backpropagation, which is very computationally expensive. So actually, from the relatively small increase in training time, we see that the ML process scales very well (for this medium-sized dataset at least) and we can infer that a large chunk of those 2 minutes is in fact spent on data conversion.</p>
 </div>
 <h2>H2O or H2No?</h2>
 <div id="h2o-or-h2no" class="section level2">
-<p>So, should you consider using H2O for <em>your</em> ML applications? Letâ&#128;&#153;s review what weâ&#128;&#153;ve discovered.</p>
+<p>So, should you consider using H2O for <em>your</em> ML applications? Let's review what we've discovered.</p>
 <div id="h2pros" class="section level4">
 <h4>H2Pros</h4>
 <ul><li><strong>Multiple interfaces available.</strong> If you use R or Python you can seamlessly integrate it into your existing workflows.</li>
 <li><strong>Intuitive to use.</strong> The R interface uses sensible, memorable function names. The Flow interface guides you through the process and shows you <em>e v e r y t h i n g</em>.</li>
 <li><strong>ML scales very well.</strong> More data? No problem. Complicated algorithm? No problem.</li>
-<li><strong>Fine control is possible.</strong> Loads of parameters to fiddle around with. Flow shows you exactly what they are. If the â&#128;&#156;Advancedâ&#128;&#157; ones arenâ&#128;&#153;t hard-core enough for you, thereâ&#128;&#153;s an â&#128;&#156;Expertâ&#128;&#157; section too.</li>
-<li><strong>Integrated ML workflow.</strong> (<code>sparklyr</code>, weâ&#128;&#153;re waiting!)</li>
+<li><strong>Fine control is possible.</strong> Loads of parameters to fiddle around with. Flow shows you exactly what they are. If the "Advanced" ones aren't hard-core enough for you, there's an "Expert" section too.</li>
+<li><strong>Integrated ML workflow.</strong> (<code>sparklyr</code>, we're waiting!)</li>
 </ul><div id="h2woes" class="section level4">
 <h4>H2Woes</h4>
-<ul><li><strong>Limited selection of algorithms.</strong> I mean, â&#128;&#156;limitedâ&#128;&#157; here is relative. If you need to use Gaussian mixtures or your application desperately requires Latent Dirichlet Allocation, youâ&#128;&#153;d better head on over to Spark. But H2O covers most things you are likely to use on a regular basis.</li>
-<li><strong>Data conversion can be H2Slow.</strong> But again, this is relative. If you have to spend 2 minutes converting your data to an H2OFrame, but this saves you 30 minutes of algorithm runtime, youâ&#128;&#153;re probably prepared to do it!</li>
-<li><strong>Some algorithms are black box methods.</strong> Butâ&#128;¦ Â¯\_(?)_/Â¯. The algorithms which are â&#128;&#156;black-boxâ&#128;&#157; are still black-box whichever implementation youâ&#128;&#153;re using, so this probably isnâ&#128;&#153;t a downside to H2O per se – itâ&#128;&#153;s more of a general ML â&#128;&#156;problemâ&#128;&#157; (whether itâ&#128;&#153;s an actual problem often depends on your point of view). And H2O is open source, so if you want to you can go and dig around in the <a href="https://github.com/h2oai/h2o-3">source code</a>.</li>
-</ul><p>So if youâ&#128;&#153;re looking for a way to speed up your ML training times by replacing R algorithm implementations, in my opinion H2O is a great choice of ML framework.</p>
+<ul><li><strong>Limited selection of algorithms.</strong> I mean, "limited" here is relative. If you need to use Gaussian mixtures or your application desperately requires Latent Dirichlet Allocation, you'd better head on over to Spark. But H2O covers most things you are likely to use on a regular basis.</li>
+<li><strong>Data conversion can be H2Slow.</strong> But again, this is relative. If you have to spend 2 minutes converting your data to an H2OFrame, but this saves you 30 minutes of algorithm runtime, you're probably prepared to do it!</li>
+<li><strong>Some algorithms are black box methods.</strong> But... Â¯\_(?)_/Â¯. The algorithms which are "black-box" are still black-box whichever implementation you're using, so this probably isn't a downside to H2O per se – it's more of a general ML "problem" (whether it's an actual problem often depends on your point of view). And H2O is open source, so if you want to you can go and dig around in the <a href="https://github.com/h2oai/h2o-3">source code</a>.</li>
+</ul><p>So if you're looking for a way to speed up your ML training times by replacing R algorithm implementations, in my opinion H2O is a great choice of ML framework.</p>
 </div>
 <h2>Bon voyage!</h2>
 <div id="bon-voyage" class="section level2">
-<p>I might have mentioned once or twice that this was just a paddle (sorry if youâ&#128;&#153;re bored of the theme, but I promise Iâ&#128;&#153;m nearly done!). I really have only touched on the basics here: thereâ&#128;&#153;s <em>loads</em> more to H2O than what Iâ&#128;&#153;ve covered in this post. If youâ&#128;&#153;re interested in GPU-based deep learning, you might want to go and read about <a href="https://www.h2o.ai/deep-water/">Deep Water</a>. If Spark and H2O sounds like a super combination, check out <a href="https://www.h2o.ai/download-2/sparkling-water/">Sparkling Water</a>. If youâ&#128;&#153;re keen on producing streamlined data analysis applications, have a look at <a href="https://www.h2o.ai/steam/">Steam</a>. And of course <a href="http://docs.h2o.ai/h2o/latest-stable/index.html">the documentation</a> for H2O, and for all those other H2O.ai enterprises, goes into much greater detail than I possibly could.</p>
-<p>Off you go then! Itâ&#128;&#153;s been fun paddling together, but now Iâ&#128;&#153;ll leave you to do your own thing. Go and dry off, or carry on frolicking in the waves, or get started training for your 100m freestyle world record attempt. Me? Iâ&#128;&#153;m off for an ice cream.</p>
+<p>I might have mentioned once or twice that this was just a paddle (sorry if you're bored of the theme, but I promise I'm nearly done!). I really have only touched on the basics here: there's <em>loads</em> more to H2O than what I've covered in this post. If you're interested in GPU-based deep learning, you might want to go and read about <a href="https://www.h2o.ai/deep-water/">Deep Water</a>. If Spark and H2O sounds like a super combination, check out <a href="https://www.h2o.ai/download-2/sparkling-water/">Sparkling Water</a>. If you're keen on producing streamlined data analysis applications, have a look at <a href="https://www.h2o.ai/steam/">Steam</a>. And of course <a href="http://docs.h2o.ai/h2o/latest-stable/index.html">the documentation</a> for H2O, and for all those other H2O.ai enterprises, goes into much greater detail than I possibly could.</p>
+<p>Off you go then! It's been fun paddling together, but now I'll leave you to do your own thing. Go and dry off, or carry on frolicking in the waves, or get started training for your 100m freestyle world record attempt. Me? I'm off for an ice cream.</p>
 <hr><div id="justme" class="section level2">
 <p><a name="justme"></a></p>
 <h5>Who is “just me”?</h5>
